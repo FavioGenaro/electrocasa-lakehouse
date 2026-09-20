@@ -1,0 +1,54 @@
+from pyspark import pipelines as dp
+
+from src.electrocasa.utils.metadata import (
+    load_metadata,
+    get_source
+)
+
+from src.electrocasa.utils.schemas import (
+    build_schema
+)
+
+from src.electrocasa.utils.ingestion import (
+    read_file_stream,
+    add_audit_columns
+)
+
+METADATA_PATH = (
+    "/Volumes/electrocasa/bronze/landing/"
+    "metadata/bronze/sources.json"
+)
+
+metadata = load_metadata(METADATA_PATH)
+
+ventas_config = get_source(
+    metadata,
+    "ventas"
+)
+
+ventas_schema = build_schema(
+    ventas_config["schema"]
+)
+
+
+@dp.table(
+    name="ventas_bronze",
+    comment="Bronze de la tabla ventas",
+    table_properties={
+        "quality": "bronze",
+        "pipelines.reset.allowed": "false",
+        "delta.appendOnly": "true",
+    },
+)
+def ventas_bronze():
+
+    df = read_file_stream(
+        spark,
+        ventas_config,
+        ventas_schema
+    )
+
+    return add_audit_columns(
+        df,
+        ventas_config
+    )

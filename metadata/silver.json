@@ -1,0 +1,260 @@
+{
+  "tables": [
+    {
+      "name": "ventas",
+      "enabled": true,
+
+      "source": {
+        "catalog": "electrocasa",
+        "schema": "bronze",
+        "table": "ventas_bronze"
+      },
+
+      "target": {
+        "catalog": "electrocasa",
+        "schema": "silver",
+        "table": "ventas_silver"
+      },
+
+      "processing": {
+        "mode": "streaming",
+        "deduplication": {
+          "enabled": true,
+          "keys": ["venta_id"]
+        },
+        "historization": {
+          "enabled": false
+        }
+      },
+
+      "expectations": {
+        "warning_venta_id_null": "venta_id IS NOT NULL",
+        "warning_sucursal_id_null": "sucursal_id IS NOT NULL",
+        "warning_producto_id_null": "producto_id IS NOT NULL",
+        "warning_monto_total_valido": "monto_total IS NOT NULL AND monto_total > 0",
+        "warning_cantidad_valida": "cantidad IS NOT NULL AND cantidad > 0"
+      },
+
+      "quality_policy": {
+        "warning_monto_total_valido": "quarantine"
+      },
+
+      "schema": {
+        "venta_id": "string",
+        "sucursal_id": "string",
+        "producto_id": "string",
+        "cantidad": "integer",
+        "monto_total": "decimal(18,2)",
+        "metodo_pago": "string",
+        "fecha_venta": "date",
+        "canal": "string"
+      }
+    },
+
+    {
+      "name": "productos",
+      "enabled": true,
+
+      "source": {
+        "catalog": "electrocasa",
+        "schema": "bronze",
+        "table": "productos_bronze"
+      },
+
+      "target": {
+        "catalog": "electrocasa",
+        "schema": "silver",
+        "table": "productos_silver"
+      },
+
+      "processing": {
+        "mode": "streaming",
+        "deduplication": {
+          "enabled": true,
+          "keys": ["producto_id"]
+        },
+        "historization": {
+          "enabled": false
+        }
+      },
+
+      "expectations": {
+        "warning_producto_id_null": "producto_id IS NOT NULL",
+        "warning_nombre_producto_null": "nombre_producto IS NOT NULL",
+        "warning_precio_lista_valido": "precio_lista IS NOT NULL AND precio_lista > 0"
+      },
+
+      "quality_policy": {
+        "warning_precio_lista_valido": "quarantine"
+      }
+    },
+
+    {
+      "name": "empleados",
+      "enabled": true,
+
+      "source": {
+        "catalog": "electrocasa",
+        "schema": "bronze",
+        "table": "empleados_bronze"
+      },
+
+      "target": {
+        "catalog": "electrocasa",
+        "schema": "silver",
+        "table": "empleados_silver"
+      },
+
+      "processing": {
+        "mode": "streaming",
+
+        "deduplication": {
+          "enabled": true,
+          "keys": [
+            "id_empleado",
+            "fecha_evento",
+            "tipo_evento"
+          ]
+        },
+
+        "historization": {
+          "enabled": true,
+          "type": 2,
+          "keys": [
+            "id_empleado"
+          ],
+          "sequence_by": "fecha_evento"
+        }
+      },
+
+      "expectations": {
+        "warning_id_empleado_null": "id_empleado IS NOT NULL",
+        "warning_dni_null": "dni IS NOT NULL",
+        "warning_fecha_evento_valida": "fecha_evento IS NOT NULL",
+        "warning_tipo_evento_valido": "tipo_evento IN ('alta', 'transferencia', 'cambio_salario', 'baja')"
+      },
+
+      "quality_policy": {
+        "warning_dni_null": "quarantine",
+        "warning_fecha_evento_valida": "quarantine"
+      }
+    },
+
+    {
+      "name": "resenas",
+      "enabled": true,
+
+      "source": {
+        "catalog": "electrocasa",
+        "schema": "bronze",
+        "table": "resenas_bronze"
+      },
+
+      "target": {
+        "catalog": "electrocasa",
+        "schema": "silver",
+        "table": "resenas_silver"
+      },
+
+      "processing": {
+        "mode": "streaming",
+        "deduplication": {
+          "enabled": true,
+          "keys": ["resena_id"]
+        },
+        "historization": {
+          "enabled": false
+        }
+      },
+
+      "expectations": {
+        "warning_resena_id_null": "resena_id IS NOT NULL",
+        "warning_producto_id_null": "producto_id IS NOT NULL",
+        "warning_calificacion_valida": "calificacion IS NOT NULL AND calificacion BETWEEN 1 AND 5",
+        "warning_fecha_resena_valida": "fecha_resena IS NOT NULL"
+      },
+
+      "quality_policy": {
+        "warning_calificacion_valida": "quarantine"
+      }
+    },
+
+    {
+      "name": "devoluciones",
+      "enabled": true,
+
+      "source": {
+        "catalog": "electrocasa",
+        "schema": "bronze",
+        "table": "devoluciones_bronze"
+      },
+
+      "target": {
+        "catalog": "electrocasa",
+        "schema": "silver",
+        "table": "devoluciones_silver"
+      },
+
+      "processing": {
+        "mode": "streaming",
+        "deduplication": {
+          "enabled": true,
+          "keys": ["devolucion_id"]
+        },
+        "historization": {
+          "enabled": false
+        }
+      },
+
+      "expectations": {
+        "warning_devolucion_id_null": "devolucion_id IS NOT NULL",
+        "warning_pedido_id_null": "pedido_id IS NOT NULL",
+        "warning_producto_id_null": "producto_id IS NOT NULL",
+        "warning_monto_reembolso_valido": "monto_reembolso IS NOT NULL AND monto_reembolso >= 0",
+        "warning_fecha_devolucion_valida": "fecha_devolucion IS NOT NULL"
+      },
+
+      "quality_policy": {
+        "warning_monto_reembolso_valido": "quarantine"
+      }
+    },
+
+    {
+      "name": "tracking",
+      "enabled": true,
+
+      "source": {
+        "catalog": "electrocasa",
+        "schema": "bronze",
+        "table": "tracking_bronze"
+      },
+
+      "target": {
+        "catalog": "electrocasa",
+        "schema": "silver",
+        "table": "tracking_silver"
+      },
+
+      "processing": {
+        "mode": "batch",
+        "deduplication": {
+          "enabled": true,
+          "keys": ["tracking_id"]
+        },
+        "historization": {
+          "enabled": false
+        }
+      },
+
+      "expectations": {
+        "warning_tracking_id_null": "tracking_id IS NOT NULL",
+        "warning_pedido_id_null": "pedido_id IS NOT NULL",
+        "warning_estado_entrega_valido": "estado_entrega IN ('entregado', 'en_transito', 'pendiente', 'devuelto')"
+      },
+
+      "quality_policy": {
+        "warning_estado_entrega_valido": "quarantine"
+      }
+    }
+  ]
+}

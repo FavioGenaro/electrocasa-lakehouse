@@ -1,0 +1,186 @@
+{
+  "sources": [
+    {
+      "name": "ventas",
+      "enabled": true,
+      "source_type": "file",
+      "ingestion_method": "autoloader",
+      "format": "csv",
+
+      "landing_path": "/Volumes/electrocasa/bronze/landing/ventas/",
+
+      "target": {
+        "catalog": "electrocasa",
+        "schema": "bronze",
+        "table": "ventas_bronze"
+      },
+
+      "options": {
+        "header": "true",
+        "delimiter": ",",
+        "inferSchema": "false"
+      },
+
+      "schema": {
+        "venta_id": "string",
+        "sucursal_id": "string",
+        "producto_id": "string",
+        "cantidad": "integer",
+        "monto_total": "decimal(18,2)",
+        "metodo_pago": "string",
+        "fecha_venta": "string",
+        "canal": "string"
+      }
+    },
+
+    {
+      "name": "productos",
+      "enabled": true,
+      "source_type": "file",
+      "ingestion_method": "autoloader",
+      "format": "json",
+
+      "landing_path": "/Volumes/electrocasa/bronze/landing/productos/",
+
+      "target": {
+        "catalog": "electrocasa",
+        "schema": "bronze",
+        "table": "productos_bronze"
+      },
+
+      "options": {
+        "inferSchema": "false"
+      },
+
+      "schema": {
+        "producto_id": "string",
+        "nombre_producto": "string",
+        "categoria": "string",
+        "marca": "string",
+        "precio_lista": "decimal(18,2)"
+      }
+    },
+
+    {
+      "name": "empleados",
+      "enabled": true,
+      "source_type": "file",
+      "ingestion_method": "autoloader",
+      "format": "csv",
+
+      "landing_path": "/Volumes/electrocasa/bronze/landing/empleados/",
+
+      "target": {
+        "catalog": "electrocasa",
+        "schema": "bronze",
+        "table": "empleados_bronze"
+      },
+
+      "options": {
+        "header": "true",
+        "delimiter": ";"
+      },
+
+      "schema": {
+        "id_empleado": "string",
+        "nombre": "string",
+        "dni": "string",
+        "email": "string",
+        "salario": "decimal(18,2)",
+        "sucursal_id": "string",
+        "cargo": "string",
+        "tipo_evento": "string",
+        "fecha_evento": "date"
+      }
+    },
+
+    {
+      "name": "resenas",
+      "enabled": true,
+      "source_type": "file",
+      "ingestion_method": "autoloader",
+      "format": "json",
+
+      "landing_path": "/Volumes/electrocasa/bronze/landing/resenas/",
+
+      "target": {
+        "catalog": "electrocasa",
+        "schema": "bronze",
+        "table": "resenas_bronze"
+      },
+
+      "schema": {
+        "resena_id": "string",
+        "producto_id": "string",
+        "cliente_id": "string",
+        "calificacion": "integer",
+        "comentario": "string",
+        "tags": "array<string>",
+        "fecha_resena": "date"
+      }
+    },
+
+    {
+      "name": "devoluciones",
+      "enabled": true,
+      "source_type": "file",
+      "ingestion_method": "autoloader",
+      "format": "csv",
+
+      "landing_path": "/Volumes/electrocasa/bronze/landing/devoluciones/",
+
+      "target": {
+        "catalog": "electrocasa",
+        "schema": "bronze",
+        "table": "devoluciones_bronze"
+      },
+
+      "options": {
+        "header": "true",
+        "delimiter": ";"
+      },
+
+      "schema": {
+        "devolucion_id": "string",
+        "pedido_id": "string",
+        "sucursal_id": "string",
+        "producto_id": "string",
+        "motivo": "string",
+        "monto_reembolso": "decimal(18,2)",
+        "fecha_devolucion": "date"
+      }
+    },
+
+    {
+      "name": "tracking",
+      "enabled": true,
+      "source_type": "azure_sql",
+      "ingestion_method": "jdbc",
+
+      "connection": {
+        "host": "${secret:electrocasa-sql/host}",
+        "port": "1433",
+        "database": "${secret:electrocasa-sql/database}",
+        "user": "${secret:electrocasa-sql/user}",
+        "password": "${secret:electrocasa-sql/password}"
+      },
+
+      "query": "SELECT tracking_id, pedido_id, courier, estado_entrega, sucursal_origen, fecha_actualizacion FROM dbo.tracking",
+
+      "target": {
+        "catalog": "electrocasa",
+        "schema": "bronze",
+        "table": "tracking_bronze"
+      },
+
+      "schema": {
+        "tracking_id": "string",
+        "pedido_id": "string",
+        "courier": "string",
+        "estado_entrega": "string",
+        "sucursal_origen": "string",
+        "fecha_actualizacion": "timestamp"
+      }
+    }
+  ]
+}
