@@ -29,8 +29,8 @@ targets:
     presets:
       source_linked_deployment: false
     workspace:
-      host: https://dbc-fcc8b0b1-83a7.cloud.databricks.com/
-      # root_path: ${var.root_path}
+      host: https://dbc-fcc8b0b1-83a7.cloud.databricks.com
+      # root_path: ${workspace.file_path}
     variables:
       catalog: electrocasa
     permissions:

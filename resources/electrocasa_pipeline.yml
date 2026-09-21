@@ -2,10 +2,11 @@ resources:
   pipelines:
     project_electrocasa_etl:
       name: electrocasa
+      id: 7648e2ee-0e9a-4c54-a6d0-ee55805e1ea9
       catalog: ${var.catalog}
       schema: ${var.schema_bronze}
       serverless: true
-      root_path: ${workspace.file_path}/../
+      root_path: ${workspace.file_path}
 
       libraries:
         - glob:

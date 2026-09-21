@@ -15,7 +15,7 @@ resources:
           depends_on:
             - task_key: load_project
           pipeline_task:
-            pipeline_id: ${resources.pipelines.ecommerce_pipeline.id}
+            pipeline_id: ${resources.pipelines.project_electrocasa_etl.id}
       queue:
         enabled: true
       performance_target: PERFORMANCE_OPTIMIZED
