@@ -1,5 +1,5 @@
 {
-  "tables": [
+  "sources": [
     {
       "name": "ventas",
       "enabled": true,
@@ -16,15 +16,32 @@
         "table": "ventas_silver"
       },
 
-      "processing": {
-        "mode": "streaming",
-        "deduplication": {
-          "enabled": true,
-          "keys": ["venta_id"]
-        },
-        "historization": {
-          "enabled": false
-        }
+      "schema": {
+        "venta_id": "string",
+        "sucursal_id": "string",
+        "producto_id": "string",
+        "cantidad": "integer",
+        "monto_total": "decimal(18,2)",
+        "metodo_pago": "string",
+        "fecha_venta": "date",
+        "canal": "string",
+        "updated_at": "timestamp"
+      },
+
+      "historization": {
+        "type": 1,
+        "keys": ["venta_id", "sucursal_id", "producto_id"],
+        "sequence_by": "updated_at",
+        "column_list": [
+          "venta_id",
+          "sucursal_id",
+          "producto_id",
+          "metodo_pago",
+          "fecha_venta",
+          "canal",
+          "cantidad",
+          "monto_total"
+        ]
       },
 
       "expectations": {
@@ -35,19 +52,16 @@
         "warning_cantidad_valida": "cantidad IS NOT NULL AND cantidad > 0"
       },
 
-      "quality_policy": {
-        "warning_monto_total_valido": "quarantine"
+       "properties": {
+        "quality.layer": "silver",
+        "quality.entity": "tracking",
+        "quality.historization": "SCD1",
+        "delta.autoOptimize.optimizeWrite": "true",
+        "delta.autoOptimize.autoCompact": "true"
       },
 
-      "schema": {
-        "venta_id": "string",
-        "sucursal_id": "string",
-        "producto_id": "string",
-        "cantidad": "integer",
-        "monto_total": "decimal(18,2)",
-        "metodo_pago": "string",
-        "fecha_venta": "date",
-        "canal": "string"
+      "quality_policy": {
+        "warning_monto_total_valido": "quarantine"
       }
     },
 
@@ -137,6 +151,11 @@
       "quality_policy": {
         "warning_dni_null": "quarantine",
         "warning_fecha_evento_valida": "quarantine"
+      },
+      "schema": {
+        "updated_at": "timestamp",
+        "__START_AT": "timestamp",
+        "__END_AT": "timestamp"
       }
     },
 

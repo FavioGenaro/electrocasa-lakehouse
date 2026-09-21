@@ -11,7 +11,8 @@ from src.electrocasa.utils.schemas import (
 
 from src.electrocasa.utils.ingestion import (
     read_file_stream,
-    add_audit_columns
+    add_audit_columns,
+    get_table_path
 )
 
 METADATA_PATH = (
@@ -21,18 +22,17 @@ METADATA_PATH = (
 
 metadata = load_metadata(METADATA_PATH)
 
-ventas_config = get_source(
-    metadata,
-    "ventas"
-)
+ventas_config = get_source(metadata, "ventas")
 
 ventas_schema = build_schema(
     ventas_config["schema"]
 )
 
+target = get_table_path(ventas_config, "target")
+
 
 @dp.table(
-    name="ventas_bronze",
+    name=target,
     comment="Bronze de la tabla ventas",
     table_properties={
         "quality": "bronze",

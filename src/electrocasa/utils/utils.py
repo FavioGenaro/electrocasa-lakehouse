@@ -1,7 +1,7 @@
 from pyspark.sql.functions import col, current_timestamp, trim, coalesce, when, to_date, substring, lit, to_timestamp, abs, hash
 from pyspark.sql.types import DateType
 
-def parse_fecha_registro_safe(fecha_col: str):
+def parse_date(fecha_col: str):
     col_trimmed = trim(col(fecha_col))
     
     return coalesce(
