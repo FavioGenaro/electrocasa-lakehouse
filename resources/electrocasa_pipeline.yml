@@ -1,0 +1,24 @@
+resources:
+  pipelines:
+    project_electrocasa_etl:
+      name: electrocasa
+      catalog: ${var.catalog}
+      schema: ${var.schema_bronze}
+      serverless: true
+      root_path: ${workspace.file_path}/../
+
+      libraries:
+        - glob:
+            include: ../src/electrocasa/transformations/**
+      event_log:
+        name: event_log_electrocasa
+        schema: monitoring
+        catalog: ${var.catalog}
+
+
+      # configuration:
+      #   bundle.catalog: ${var.catalog} # el valor de estas variables estan en la sección de variables de databricks.yml
+      #   bundle.schema_bronze: ${var.schema_bronze}
+      #   bundle.schema_silver: ${var.schema_silver}
+      #   bundle.schema_gold: ${var.schema_gold}
+      #   bundle.landing_path: ${var.landing_path}
