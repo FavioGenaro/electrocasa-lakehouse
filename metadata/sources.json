@@ -78,7 +78,7 @@
 
       "options": {
         "header": "true",
-        "delimiter": ";"
+        "delimiter": ","
       },
 
       "schema": {
@@ -90,7 +90,7 @@
         "sucursal_id": "string",
         "cargo": "string",
         "tipo_evento": "string",
-        "fecha_evento": "date"
+        "fecha_evento": "string"
       }
     },
 
@@ -115,8 +115,9 @@
         "cliente_id": "string",
         "calificacion": "integer",
         "comentario": "string",
-        "tags": "array<string>",
-        "fecha_resena": "date"
+        "tags": "string",
+        "respuestas": "string",
+        "fecha_resena": "string"
       }
     },
 
@@ -137,7 +138,7 @@
 
       "options": {
         "header": "true",
-        "delimiter": ";"
+        "delimiter": ","
       },
 
       "schema": {
@@ -147,7 +148,7 @@
         "producto_id": "string",
         "motivo": "string",
         "monto_reembolso": "decimal(18,2)",
-        "fecha_devolucion": "date"
+        "fecha_devolucion": "string"
       }
     },
 
@@ -157,15 +158,12 @@
       "source_type": "azure_sql",
       "ingestion_method": "jdbc",
 
-      "connection": {
-        "host": "${secret:electrocasa-sql/host}",
-        "port": "1433",
-        "database": "${secret:electrocasa-sql/database}",
-        "user": "${secret:electrocasa-sql/user}",
-        "password": "${secret:electrocasa-sql/password}"
+      "options": {
+        "url": "jdbc:sqlserver://analyticsdmc.database.windows.net;database=electrocasadb",
+        "dbtable": "SELECT tracking_id, pedido_id, courier, estado_entrega, sucursal_origen, fecha_actualizacion FROM dbo.TrackingEnvios",
+        "user": "sqladmin",
+        "password": "mdp123$$"
       },
-
-      "query": "SELECT tracking_id, pedido_id, courier, estado_entrega, sucursal_origen, fecha_actualizacion FROM dbo.tracking",
 
       "target": {
         "catalog": "electrocasa",
@@ -179,7 +177,7 @@
         "courier": "string",
         "estado_entrega": "string",
         "sucursal_origen": "string",
-        "fecha_actualizacion": "timestamp"
+        "fecha_actualizacion": "string"
       }
     }
   ]

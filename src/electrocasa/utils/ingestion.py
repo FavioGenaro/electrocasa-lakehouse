@@ -51,6 +51,47 @@ def read_file_stream(
     )
 
 
+def read_file(
+    spark,
+    config: dict,
+    schema: StructType
+) -> DataFrame:
+
+    reader = (
+        spark.read
+            .format(config["format"])
+            .schema(schema)
+    )
+
+    # opciones de configuración
+    options = config.get("options", {})
+
+    for key, value in options.items():
+        reader = reader.option(key, value)
+
+    return reader.load(
+        config["landing_path"]
+    )
+
+def read_file_jdbc(
+    spark,
+    config: dict,
+    schema: StructType
+) -> DataFrame:
+
+    reader = (
+        spark.read
+            .format("jdbc")
+            .schema(schema)
+    )
+
+    # opciones de configuración
+    options = config.get("options", {})
+
+    for key, value in options.items():
+        reader = reader.option(key, value)
+
+    return reader.load()
 
 def add_audit_columns(df: DataFrame, config: dict) -> DataFrame:
 
