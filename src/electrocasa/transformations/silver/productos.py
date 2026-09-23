@@ -1,10 +1,9 @@
 from pyspark import pipelines as dp
-from pyspark.sql.functions import (col, trim, lower, current_timestamp)
+from pyspark.sql.functions import (col, trim, lower, current_timestamp, regexp_replace)
 
 from src.electrocasa.utils.metadata import (load_metadata, get_source)
 from src.electrocasa.utils.schemas import (build_schema)
 from src.electrocasa.utils.ingestion import (read_file_stream, add_audit_columns, get_table_path, create_auto_cdc_from_metadata)
-from src.electrocasa.utils.utils import (parse_date)
 
 
 METADATA_PATH = (
@@ -31,7 +30,7 @@ def staging_productos():
         spark.readStream.table(source)
         .withColumn("producto_id", trim(col("producto_id")))
         .withColumn("nombre_producto", trim(col("nombre_producto")))
-        .withColumn("categoria", trim(col("categoria")))
+        .withColumn("categoria", lower(regexp_replace(trim(col("categoria")), " ", "_")))
         .withColumn("marca", lower(trim(col("marca"))))
         .withColumn("precio_lista", col("precio_lista").cast("decimal(18,2)"))
         .withColumn("updated_at", current_timestamp())

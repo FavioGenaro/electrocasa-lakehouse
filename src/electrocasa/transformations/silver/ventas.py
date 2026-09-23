@@ -1,5 +1,5 @@
 from pyspark import pipelines as dp
-from pyspark.sql.functions import (col, trim, lower, current_timestamp)
+from pyspark.sql.functions import (col, trim, lower, current_timestamp, regexp_replace)
 
 from src.electrocasa.utils.metadata import (load_metadata, get_source)
 from src.electrocasa.utils.schemas import (build_schema)
@@ -32,7 +32,7 @@ def staging_ventas():
         .withColumn("venta_id", trim(col("venta_id")))
         .withColumn("sucursal_id", trim(col("sucursal_id")))
         .withColumn("producto_id", trim(col("producto_id")))
-        .withColumn("metodo_pago", lower(trim(col("metodo_pago"))))
+        .withColumn("metodo_pago", lower(regexp_replace(trim(col("metodo_pago")), " ", "_")))
         .withColumn("fecha_venta", parse_date("fecha_venta").cast("date"))
         .withColumn("canal", lower(trim(col("canal"))))
         .withColumn("cantidad", col("cantidad").cast("integer"))

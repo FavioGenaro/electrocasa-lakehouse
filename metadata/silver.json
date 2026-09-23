@@ -33,14 +33,12 @@
         "keys": ["venta_id", "sucursal_id", "producto_id"],
         "sequence_by": "updated_at",
         "column_list": [
-          "venta_id",
-          "sucursal_id",
-          "producto_id",
           "metodo_pago",
           "fecha_venta",
           "canal",
           "cantidad",
-          "monto_total"
+          "monto_total",
+          "updated_at"
         ]
       },
 
@@ -81,21 +79,40 @@
         "table": "productos_silver"
       },
 
-      "processing": {
-        "mode": "streaming",
-        "deduplication": {
-          "enabled": true,
-          "keys": ["producto_id"]
-        },
-        "historization": {
-          "enabled": false
-        }
+      "schema": {
+        "producto_id": "string",
+        "nombre_producto": "string",
+        "categoria": "string",
+        "marca": "string",
+        "precio_lista": "decimal(18,2)",
+        "updated_at": "timestamp"
+      },
+
+      "historization": {
+        "type": 1,
+        "keys": ["producto_id"],
+        "sequence_by": "updated_at",
+        "column_list": [
+          "nombre_producto",
+          "categoria",
+          "marca",
+          "precio_lista",
+          "updated_at"
+        ]
       },
 
       "expectations": {
         "warning_producto_id_null": "producto_id IS NOT NULL",
         "warning_nombre_producto_null": "nombre_producto IS NOT NULL",
         "warning_precio_lista_valido": "precio_lista IS NOT NULL AND precio_lista > 0"
+      },
+
+       "properties": {
+        "quality.layer": "silver",
+        "quality.entity": "tracking",
+        "quality.historization": "SCD1",
+        "delta.autoOptimize.optimizeWrite": "true",
+        "delta.autoOptimize.autoCompact": "true"
       },
 
       "quality_policy": {
@@ -119,26 +136,38 @@
         "table": "empleados_silver"
       },
 
-      "processing": {
-        "mode": "streaming",
+      "schema": {
+        "id_empleado": "string",
+        "nombre": "string",
+        "dni": "string",
+        "email": "string",
+        "salario": "decimal(18,2)",
+        "sucursal_id": "string",
+        "cargo": "string",
+        "tipo_evento": "string",
+        "fecha_evento": "date",
+        "updated_at": "timestamp",
+        "__START_AT": "timestamp",
+        "__END_AT": "timestamp"
+      },
 
-        "deduplication": {
-          "enabled": true,
-          "keys": [
+      "historization": {
+        "type": 2,
+        "keys": [
             "id_empleado",
             "fecha_evento",
             "tipo_evento"
-          ]
-        },
-
-        "historization": {
-          "enabled": true,
-          "type": 2,
-          "keys": [
-            "id_empleado"
           ],
-          "sequence_by": "fecha_evento"
-        }
+        "sequence_by": "updated_at",
+        "track_history_column_list": [
+          "nombre",
+          "dni",
+          "email",
+          "salario",
+          "sucursal_id",
+          "cargo",
+          "updated_at"
+        ]
       },
 
       "expectations": {
@@ -148,15 +177,19 @@
         "warning_tipo_evento_valido": "tipo_evento IN ('alta', 'transferencia', 'cambio_salario', 'baja')"
       },
 
+       "properties": {
+        "quality.layer": "silver",
+        "quality.entity": "tracking",
+        "quality.historization": "SCD2",
+        "delta.autoOptimize.optimizeWrite": "true",
+        "delta.autoOptimize.autoCompact": "true"
+      },
+
       "quality_policy": {
         "warning_dni_null": "quarantine",
         "warning_fecha_evento_valida": "quarantine"
-      },
-      "schema": {
-        "updated_at": "timestamp",
-        "__START_AT": "timestamp",
-        "__END_AT": "timestamp"
       }
+
     },
 
     {
@@ -175,15 +208,32 @@
         "table": "resenas_silver"
       },
 
-      "processing": {
-        "mode": "streaming",
-        "deduplication": {
-          "enabled": true,
-          "keys": ["resena_id"]
-        },
-        "historization": {
-          "enabled": false
-        }
+      "schema": {
+        "resena_id": "string",
+        "producto_id": "string",
+        "cliente_id": "string",
+        "calificacion": "integer",
+        "comentario": "string",
+        "tags": "array<string>",
+        "respuestas": "array<objectrespuestaresena>",
+        "fecha_resena": "date",
+        "updated_at": "timestamp"
+      },
+
+      "historization": {
+        "type": 1,
+        "keys": ["resena_id"],
+        "sequence_by": "updated_at",
+        "column_list": [
+          "producto_id",
+          "cliente_id",
+          "calificacion",
+          "comentario",
+          "tags",
+          "respuestas",
+          "fecha_resena",
+          "updated_at"
+        ]
       },
 
       "expectations": {
@@ -191,6 +241,14 @@
         "warning_producto_id_null": "producto_id IS NOT NULL",
         "warning_calificacion_valida": "calificacion IS NOT NULL AND calificacion BETWEEN 1 AND 5",
         "warning_fecha_resena_valida": "fecha_resena IS NOT NULL"
+      },
+
+       "properties": {
+        "quality.layer": "silver",
+        "quality.entity": "tracking",
+        "quality.historization": "SCD1",
+        "delta.autoOptimize.optimizeWrite": "true",
+        "delta.autoOptimize.autoCompact": "true"
       },
 
       "quality_policy": {
@@ -214,15 +272,30 @@
         "table": "devoluciones_silver"
       },
 
-      "processing": {
-        "mode": "streaming",
-        "deduplication": {
-          "enabled": true,
-          "keys": ["devolucion_id"]
-        },
-        "historization": {
-          "enabled": false
-        }
+      "schema": {
+        "devolucion_id": "string",
+        "pedido_id": "string",
+        "sucursal_id": "string",
+        "producto_id": "string",
+        "motivo": "string",
+        "monto_reembolso": "decimal(18,2)",
+        "fecha_devolucion": "date",
+        "updated_at": "timestamp"
+      },
+
+      "historization": {
+        "type": 1,
+        "keys": ["devolucion_id"],
+        "sequence_by": "updated_at",
+        "column_list": [
+          "pedido_id",
+          "sucursal_id",
+          "producto_id",
+          "motivo",
+          "monto_reembolso",
+          "fecha_devolucion",
+          "updated_at"
+        ]
       },
 
       "expectations": {
@@ -231,6 +304,14 @@
         "warning_producto_id_null": "producto_id IS NOT NULL",
         "warning_monto_reembolso_valido": "monto_reembolso IS NOT NULL AND monto_reembolso >= 0",
         "warning_fecha_devolucion_valida": "fecha_devolucion IS NOT NULL"
+      },
+
+       "properties": {
+        "quality.layer": "silver",
+        "quality.entity": "tracking",
+        "quality.historization": "SCD1",
+        "delta.autoOptimize.optimizeWrite": "true",
+        "delta.autoOptimize.autoCompact": "true"
       },
 
       "quality_policy": {
@@ -254,21 +335,42 @@
         "table": "tracking_silver"
       },
 
-      "processing": {
-        "mode": "batch",
-        "deduplication": {
-          "enabled": true,
-          "keys": ["tracking_id"]
-        },
-        "historization": {
-          "enabled": false
-        }
+      "schema": {
+        "tracking_id": "string",
+        "pedido_id": "string",
+        "courier": "string",
+        "estado_entrega": "string",
+        "sucursal_origen": "string",
+        "fecha_actualizacion": "string",
+        "updated_at": "timestamp"
+      },
+
+      "historization": {
+        "type": 1,
+        "keys": ["tracking_id"],
+        "sequence_by": "updated_at",
+        "column_list": [
+          "pedido_id",
+          "courier",
+          "estado_entrega",
+          "sucursal_origen",
+          "fecha_actualizacion",
+          "updated_at"
+        ]
       },
 
       "expectations": {
         "warning_tracking_id_null": "tracking_id IS NOT NULL",
         "warning_pedido_id_null": "pedido_id IS NOT NULL",
         "warning_estado_entrega_valido": "estado_entrega IN ('entregado', 'en_transito', 'pendiente', 'devuelto')"
+      },
+
+       "properties": {
+        "quality.layer": "silver",
+        "quality.entity": "tracking",
+        "quality.historization": "SCD1",
+        "delta.autoOptimize.optimizeWrite": "true",
+        "delta.autoOptimize.autoCompact": "true"
       },
 
       "quality_policy": {

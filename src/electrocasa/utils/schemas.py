@@ -50,6 +50,19 @@ def parse_data_type(data_type: str):
 
     if data_type.startswith("array<string>"):
         return ArrayType(StringType())
+    
+    if data_type.startswith("array<objectrespuestaresena>"):
+        return ArrayType(
+            StructType([
+                StructField("autor", StringType(), True),
+                StructField("texto", StringType(), True)
+            ]),
+            True
+        )
+    
+    # if data_type.startswith("array<string>"):
+    #     return ArrayType(StringType())
+    
 
     raise ValueError(
         f"Tipo de dato no soportado: {data_type}"

@@ -49,7 +49,8 @@
       },
 
       "options": {
-        "inferSchema": "false"
+        "inferSchema": "false",
+        "multiLine": "true"
       },
 
       "schema": {
@@ -102,11 +103,16 @@
       "format": "json",
 
       "landing_path": "/Volumes/electrocasa/bronze/landing/resenas/",
-
+      
       "target": {
         "catalog": "electrocasa",
         "schema": "bronze",
         "table": "resenas_bronze"
+      },
+
+      "options": {
+        "inferSchema": "false",
+        "multiLine": "true"
       },
 
       "schema": {
@@ -115,8 +121,8 @@
         "cliente_id": "string",
         "calificacion": "integer",
         "comentario": "string",
-        "tags": "string",
-        "respuestas": "string",
+        "tags": "array<string>",
+        "respuestas": "array<objectrespuestaresena>",
         "fecha_resena": "string"
       }
     },
