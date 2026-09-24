@@ -36,7 +36,8 @@ target = get_table_path(productos_config, "target")
     comment="Bronze de la tabla productos",
     table_properties={
         "quality": "bronze",
-        "pipelines.reset.allowed": "true"
+        "pipelines.reset.allowed": "true",
+        "delta.appendOnly": "false",
     },
 )
 def productos_bronze():

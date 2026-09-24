@@ -9,29 +9,32 @@ schema_gold = spark.conf.get("schema_gold")
 @dp.materialized_view(
     name=f"{catalog}.{schema_gold}.resenas_categoria",
     comment="Cantidad reseñas negativas por categoria de producto",
+    table_properties={
+        "quality": "gold",
+        "delta.appendOnly": "false",
+        "pipelines.reset.allowed": "true",
+        "delta.autoOptimize.optimizeWrite": "true",
+        "delta.autoOptimize.autoCompact": "true"
+    }
 )
 def resenas_categoria():
 
     resenas = (
         spark.read.table(f"{catalog}.{schema_silver}.resenas_silver")
-        .withColumn(
-            "periodo",
-            date_trunc(
-                "month",
-                col("fecha_resena")
-            )
-        )
+            .filter(col("calificacion").isNotNull())
     )
 
-    productos = spark.read.table(f"{catalog}.{schema_silver}.productos_silver")
+    productos = (
+        spark.read.table(f"{catalog}.{schema_silver}.productos_silver")
+            .select("producto_id", "categoria")
+            .filter(col("categoria").isNotNull())
+            .filter(col("producto_id").isNotNull())
+    )
     
     return (
         resenas
         .join(
-            productos.select(
-                "producto_id",
-                "categoria"
-            ),
+            productos,
             "producto_id",
             "left"
         )
@@ -43,7 +46,7 @@ def resenas_categoria():
             ).otherwise(0)
         )
         .groupBy(
-            "periodo",
+            # "periodo",
             "categoria"
         )
         .agg(

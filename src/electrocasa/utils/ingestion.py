@@ -4,7 +4,8 @@ from pyspark.sql.types import StructType
 
 from pyspark.sql.functions import (
     current_timestamp,
-    lit
+    lit,
+    when
 )
 
 def get_table_path(config: dict, clave: str) -> str:
@@ -91,19 +92,21 @@ def read_file_jdbc(
     for key, value in options.items():
         reader = reader.option(key, value)
 
-    return reader.load()
+    return reader.option("driver", "com.microsoft.sqlserver.jdbc.SQLServerDriver").load()
+
 
 def add_audit_columns(df: DataFrame, config: dict) -> DataFrame:
 
+    if config["ingestion_method"] == "jdbc":
+        df_final = df.withColumn("_source_file", lit(config["source_type"]))
+    else:
+        df_final = df.withColumn("_source_file", df["_metadata.file_path"])
+
     return (
-        df
+        df_final
         .withColumn(
             "_ingestion_timestamp",
             current_timestamp()
-        )
-        .withColumn(
-            "_source_file",
-            df["_metadata.file_path"]
         )
         .withColumn(
             "_source_system",

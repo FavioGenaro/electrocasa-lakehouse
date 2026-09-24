@@ -9,19 +9,25 @@ schema_gold = spark.conf.get("schema_gold")
 
 @dp.materialized_view(
     name=f"{catalog}.{schema_gold}.ranking_productos",
-    comment="Ranking de productos por ventas y devoluciones",
+    comment="Ranking de productos por categoria en base a las ventas y devoluciones",
+    table_properties={
+        "quality": "gold",
+        "delta.appendOnly": "false",
+        "pipelines.reset.allowed": "true",
+        "delta.autoOptimize.optimizeWrite": "true",
+        "delta.autoOptimize.autoCompact": "true"
+    }
 )
 def ranking_productos():
 
     ventas = (
-        # dp.read("electrocasa.silver.ventas")
         spark.read.table(f"{catalog}.{schema_silver}.ventas_silver")
         .withColumn(
             "periodo",
             date_trunc("month", col("fecha_venta"))
         )
         .groupBy(
-            "periodo",
+            # "periodo",
             "producto_id"
         )
         .agg(
@@ -31,7 +37,6 @@ def ranking_productos():
     )
 
     devoluciones = (
-        # dp.read("electrocasa.silver.devoluciones")
         spark.read.table(f"{catalog}.{schema_silver}.devoluciones_silver")
         .withColumn(
             "periodo",
@@ -41,7 +46,7 @@ def ranking_productos():
             )
         )
         .groupBy(
-            "periodo",
+            # "periodo",
             "producto_id"
         )
         .agg(
@@ -54,17 +59,40 @@ def ranking_productos():
         )
     )
 
-    productos = spark.read.table(f"{catalog}.{schema_silver}.productos_silver")
+    productos = (
+        spark.read.table(f"{catalog}.{schema_silver}.productos_silver")
+            .filter(col("precio_lista").isNotNull() & (col("precio_lista") > 0))
+            .select("producto_id", "nombre_producto", "categoria", "precio_lista")
+    )
 
+    # resultado = (
+    #     ventas
+    #     .join(
+    #         devoluciones,
+    #         ["periodo", "producto_id"],
+    #         "full"
+    #     )
+    #     .join(
+    #         productos,
+    #         "producto_id",
+    #         "left"
+    #     )
+    #     .fillna({
+    #         "unidades_vendidas": 0,
+    #         "ventas_totales": 0,
+    #         "cantidad_devoluciones": 0,
+    #         "monto_devoluciones": 0
+    #     })
+    # )
     resultado = (
-        ventas
+        productos
         .join(
             devoluciones,
-            ["periodo", "producto_id"],
-            "full"
+            "producto_id",
+            "left"
         )
         .join(
-            productos,
+            ventas,
             "producto_id",
             "left"
         )
@@ -81,7 +109,7 @@ def ranking_productos():
         .withColumn(
             "ranking_ventas",
             dense_rank().over(
-                Window.partitionBy("periodo")
+                Window.partitionBy("categoria")
                 .orderBy(
                     desc("unidades_vendidas")
                 )
@@ -90,7 +118,7 @@ def ranking_productos():
         .withColumn(
             "ranking_devoluciones",
             dense_rank().over(
-                Window.partitionBy("periodo")
+                Window.partitionBy("categoria")
                 .orderBy(
                     desc("cantidad_devoluciones")
                 )

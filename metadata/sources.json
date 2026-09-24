@@ -165,8 +165,8 @@
       "ingestion_method": "jdbc",
 
       "options": {
-        "url": "jdbc:sqlserver://analyticsdmc.database.windows.net;database=electrocasadb",
-        "dbtable": "SELECT tracking_id, pedido_id, courier, estado_entrega, sucursal_origen, fecha_actualizacion FROM dbo.TrackingEnvios",
+        "url": "jdbc:sqlserver://server-db-tracking.database.windows.net:1433;database=db-databricks-tracking;encrypt=true;trustServerCertificate=false;",
+        "query": "SELECT tracking_id, pedido_id, courier, estado_entrega, sucursal_origen, CAST(fecha_actualizacion AS VARCHAR(255)) AS fecha_actualizacion FROM dbo.TrackingEnvios",
         "user": "sqladmin",
         "password": "mdp123$$"
       },

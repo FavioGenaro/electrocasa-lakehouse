@@ -3,19 +3,19 @@ resources:
     project_electrocasa_job:
       name: electrocasa_job
       schedule:
-        quartz_cron_expression: 10 0 22 * * ?
+        quartz_cron_expression: 10 59 23 * * ?
         timezone_id: America/Lima
         pause_status: UNPAUSED
       tasks:
-        - task_key: load_project
-          notebook_task:
-            notebook_path: ${workspace.file_path}/../notebooks/00_setup
-            source: WORKSPACE
         - task_key: load_data
           depends_on:
             - task_key: load_project
           pipeline_task:
             pipeline_id: ${resources.pipelines.project_electrocasa_etl.id}
+        - task_key: validation_tables
+          notebook_task:
+            notebook_path: ${workspace.file_path}/notebooks/01_validaciones
+            source: WORKSPACE
       queue:
         enabled: true
       performance_target: PERFORMANCE_OPTIMIZED
