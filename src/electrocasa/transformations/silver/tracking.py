@@ -28,7 +28,9 @@ target = get_table_path(tracking_config, "target")
 def staging_tracking():
 
     df = (
-        spark.readStream.table(source)
+        spark.readStream
+        .option("ignoreChanges", "true")
+        .table(source)
         .withColumn("tracking_id", trim(col("tracking_id")))
         .withColumn("pedido_id", trim(col("pedido_id")))
         .withColumn("courier", lower(trim(col("courier"))))

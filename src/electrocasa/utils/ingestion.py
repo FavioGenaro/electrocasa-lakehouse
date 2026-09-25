@@ -77,7 +77,9 @@ def read_file(
 def read_file_jdbc(
     spark,
     config: dict,
-    schema: StructType
+    schema: StructType,
+    user_db,
+    password_db
 ) -> DataFrame:
 
     reader = (
@@ -92,7 +94,13 @@ def read_file_jdbc(
     for key, value in options.items():
         reader = reader.option(key, value)
 
-    return reader.option("driver", "com.microsoft.sqlserver.jdbc.SQLServerDriver").load()
+    return (
+        reader
+        .option("user", user_db)
+        .option("password", password_db)
+        .option("driver", "com.microsoft.sqlserver.jdbc.SQLServerDriver")
+        .load()
+    )
 
 
 def add_audit_columns(df: DataFrame, config: dict) -> DataFrame:

@@ -27,7 +27,9 @@ target = get_table_path(productos_config, "target")
 def staging_productos():
 
     df = (
-        spark.readStream.table(source)
+        spark.readStream
+        .option("ignoreChanges", "true")
+        .table(source)
         .withColumn("producto_id", trim(col("producto_id")))
         .withColumn("nombre_producto", trim(col("nombre_producto")))
         .withColumn("categoria", lower(regexp_replace(trim(col("categoria")), " ", "_")))
