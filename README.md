@@ -21,7 +21,7 @@ El caso de uso busca consolidar información de ventas, productos, empleados, re
 ## 2. Arquitectura propuesta
 
 - Nombre del catálogo: `electrocasa`
-- Esquemas: `bronze`, `silver`, `gold`
+- Esquemas: `bronze`, `silver`, `gold`, `monitoring`
 
 ### 2.1 Origen de datos 
 
@@ -75,6 +75,10 @@ En `electrocasa.gold` se publican vistas materializadas y agregaciones orientada
 - `tracking_envios`
 
 Estas tablas están pensadas para responder preguntas de negocio, métricas y KPIs, no para conservar copias de origen.
+
+### 2.5 Capa Monitoring
+
+En `electrocasa.monitoring` se registran los resultados y eventos provenientes de la ejecución del pipeline.
 
 ---
 
@@ -155,7 +159,7 @@ Archivo:
 Este notebook realiza la creación inicial del entorno:
 
 - Catálogo `electrocasa`
-- Schemas `bronze`, `silver` y `gold`
+- Schemas `bronze`, `silver`, `gold` y `monitoring`
 - Volumen `electrocasa.bronze.landing`
 - Asignación de permisos por grupo
 
@@ -229,6 +233,7 @@ Permisos asignados:
 - `USE SCHEMA` + `SELECT` + `MODIFY` sobre `electrocasa.bronze`
 - `USE SCHEMA` + `SELECT` + `MODIFY` sobre `electrocasa.silver`
 - `USE SCHEMA` + `SELECT` + `MODIFY` sobre `electrocasa.gold`
+- `USE SCHEMA` + `SELECT` + `MODIFY` sobre `electrocasa.monitoring`
 
 #### analysts_team
 
@@ -248,7 +253,7 @@ Permisos asignados:
 - `USE CATALOG` sobre `electrocasa`
 - `USE SCHEMA` + `SELECT` sobre `electrocasa.gold`
 - `BROWSE` sobre el catálogo.
-
+- `USE SCHEMA` + `SELECT` sobre `electrocasa.monitoring`
 
 ### 5.3 Cargar datos
 
@@ -381,9 +386,9 @@ Se cuenta con una Event log para monitorear el estado de las ejecuciones del job
 
 ![Imagen del montoreo](/capturas/monitoreo.png)
 
-## 8. Suposiciones de cluster y costos
+## 9. Suposiciones de cluster y costos
 
-### 8.1 Tipo de cluster asumido
+### 9.1 Tipo de cluster asumido
 
 La solución usa un pipeline `serverless` y un job con queue enabled. Esto implica:
 
@@ -393,7 +398,7 @@ La solución usa un pipeline `serverless` y un job con queue enabled. Esto impli
 
 También se usa `performance_target: PERFORMANCE_OPTIMIZED`, que busca equilibrar latencia y rendimiento para las cargas analíticas y tareas de transformación.
 
-### 8.2 Costo asumido
+### 9.2 Costo asumido
 
 La estrategia de costo asumida es:
 
@@ -418,7 +423,16 @@ La solución usa Unity Catalog para garantizar:
 - Trazabilidad sobre los datos de negocio.
 - Aislamiento entre los perfiles de ingeniería, analítica y auditoría.
 
-Esto es clave para un entorno de datos empresarial, ya que evita que usuarios no autorizados puedan consultar o alterar datos sensibles o operativos.
+Por ello, sumando controles de acceso a los datos, se agregaron registricciones a nivel de columna con funciones de emascaramiento creadas en el catálogo `security`.
+
+- mask_dni: Enamascara la columna DNI para todas los usuarios que no pertenezacan al grupo `engineering_team`.
+- mask_salario: Enamascara la columna salario para todas los usuarios que no pertenezacan al grupo `engineering_team`.
+
+![Imagen de emnascaramiento](/capturas/emascaramiento.png)
+
+
+Para un entorno de datos empresarial, ya que evita que usuarios no autorizados puedan consultar o alterar datos sensibles o operativos.
+
 
 ---
 
