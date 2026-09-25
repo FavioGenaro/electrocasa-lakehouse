@@ -2,17 +2,22 @@ resources:
   jobs:
     project_electrocasa_job:
       name: electrocasa_job
+      email_notifications:
+        on_success:
+          - faviogenarosaico@gmail.com
+        on_failure:
+          - faviogenarosaico@gmail.com
       schedule:
-        quartz_cron_expression: 10 59 23 * * ?
+        quartz_cron_expression: 15 59 23 * * ?
         timezone_id: America/Lima
         pause_status: UNPAUSED
       tasks:
-        - task_key: load_data
-          depends_on:
-            - task_key: load_project
+        - task_key: electrocasa_pipeline
           pipeline_task:
             pipeline_id: ${resources.pipelines.project_electrocasa_etl.id}
         - task_key: validation_tables
+          depends_on:
+            - task_key: electrocasa_pipeline
           notebook_task:
             notebook_path: ${workspace.file_path}/notebooks/01_validaciones
             source: WORKSPACE

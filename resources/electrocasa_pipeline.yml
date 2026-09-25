@@ -12,14 +12,17 @@ resources:
         - glob:
             include: ../src/electrocasa/transformations/**
       event_log:
-        name: event_log_electrocasa
-        schema: monitoring
+        name: ${var.table_monitoring}
+        schema: ${var.schema_monitoring}
         catalog: ${var.catalog}
 
-
+      configuration:
+        catalog: ${var.catalog}
+        schema_silver: ${var.schema_silver}
+        schema_gold: ${var.schema_gold}
       # configuration:
       #   bundle.catalog: ${var.catalog} # el valor de estas variables estan en la sección de variables de databricks.yml
       #   bundle.schema_bronze: ${var.schema_bronze}
       #   bundle.schema_silver: ${var.schema_silver}
       #   bundle.schema_gold: ${var.schema_gold}
-      #   bundle.landing_path: ${var.landing_path}
+      # bundle.landing_path: ${var.landing_path}

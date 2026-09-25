@@ -10,10 +10,10 @@ La documentación se basa en la estructura real del repositorio y en el material
 
 El caso de uso busca consolidar información de ventas, productos, empleados, reseñas, devoluciones y tracking de entregas en un único repositorio analítico, con capacidad para:
 
-- Integrar fuentes heterogéneas en un catálogo unificado;
-- Separar la ingesta cruda de la lógica analítica;
-- Aplicar validaciones de calidad y reglas de historización en la capa silver;
-- Publicar indicadores y agregados empresariales en gold;
+- Integrar fuentes heterogéneas en un catálogo unificado.
+- Separar la ingesta cruda de la lógica analítica.
+- Aplicar validaciones de calidad y reglas de historización en la capa silver.
+- Publicar indicadores y agregados empresariales en gold.
 - Entregar acceso por perfiles funcionales con controles de seguridad a nivel de catálogo y esquema.
 
 ---
@@ -49,9 +49,9 @@ En esta capa se materializan las tablas:
 
 Dentro de `electrocasa.silver` se aplican:
 
-- limpieza y normalización de datos;
-- validaciones con `expect_all`;
-- tratamiento de tipos de datos;
+- limpieza y normalización de datos.
+- validaciones con `expect_all`.
+- tratamiento de tipos de datos.
 - uso de historización para conservar el estado de los registros.
 
 En esta capa se materializan las tablas:
@@ -82,11 +82,10 @@ Estas tablas están pensadas para responder preguntas de negocio, métricas y KP
 
 Se eligieron tablas Delta por varias razones:
 
-- soporte nativo para ACID transactions;
-- compatibilidad con Unity Catalog;
-- mejor rendimiento para lecturas y escrituras analíticas;
-- capacidad de optimización automática con `delta.autoOptimize.optimizeWrite` y `delta.autoOptimize.autoCompact`;
-- idoneidad para pipelines de ingestion y reporting en Databricks.
+- Soporte nativo para ACID transactions.
+- Compatibilidad con Unity Catalog.
+- Mejor rendimiento para lecturas y escrituras analíticas.
+- Capacidad de optimización automática con `delta.autoOptimize.optimizeWrite` y `delta.autoOptimize.autoCompact`.
 
 ### 3.1 Tipo de historización por entidad
 
@@ -94,7 +93,7 @@ El proyecto usa dos tipos de historización según la naturaleza de cada dato:
 
 #### SCD Type 1
 
-Se usa en tablas donde el dato más reciente reemplaza al anterior, y no interesa conservar el histórico completo del valor por cambios temporales. Ejemplos:
+Se usa en tablas donde no interesa conservar el histórico completo del valor por cambios temporales. Esto aplica porque se prioriza el estado actual de los datos y se asume que la gran mayoría de estas entidades se consultan en su versión actual. Las tablas son:
 
 - ventas
 - productos
@@ -102,7 +101,6 @@ Se usa en tablas donde el dato más reciente reemplaza al anterior, y no interes
 - devoluciones
 - tracking
 
-Esto aplica porque se prioriza el estado actual del registro y se asume que la gran mayoría de estas entidades se consultan en su versión vigente.
 
 #### SCD Type 2
 
@@ -114,11 +112,13 @@ Por esa razón, la metadata de `empleados` define:
 - `keys`: `id_empleado`, `fecha_evento`, `tipo_evento`
 - `track_history_column_list` para guardar atributos históricos
 
-Esto permite responder preguntas como:
+### 3.2 Tipo de tabla
 
-- ¿cuánto ganaba un empleado antes de un cambio de salario?
-- ¿cómo evolucionó su cargo a lo largo del tiempo?
-- ¿qué estado tenía en una fecha puntual?
+- Vistas materializadas sobre `tracking` y `productos` porque el origen entrega una foto completa de los datos con alteraciones menores y de baja volumetria, siendo que volverla a escribir completa es extremadamente bajo y no toma tiempo.
+
+- Tablas Streaming sobre `ventas`, `reseñas`, `devoluciones` y `empleados` para tablas con mayor flujo de información que requiere ser almacenada de forma incremental.
+
+Toda las tablas, excepto `tracking`, son del tipo Managed para que Databricks ejecute de forma autónoma tareas de mantenimiento como OPTIMIZE y VACUUM, además de aplicar optimizaciones en tiempo ejecución. La tabla `tracking` proviene de una fuente externa de datos (base de datos) por lo que será una tabla tipo External
 
 ---
 
@@ -132,12 +132,12 @@ Archivo principal:
 
 Define:
 
-- el nombre del bundle: `electrocasa_project`
-- catálogo principal: `electrocasa`
-- esquemas: `bronze`, `silver`, `gold`
-- target `dev`
-- host del workspace destino
-- permisos del usuario actual para gestionar el bundle
+- El nombre del bundle: `electrocasa_project`
+- Catálogo principal: `electrocasa`
+- Esquemas: `bronze`, `silver`, `gold`
+- Target `dev`
+- Host del workspace destino
+- Permisos del usuario actual para gestionar el bundle
 
 ### 4.2 Recursos de Databricks
 
@@ -168,11 +168,11 @@ Archivos:
 
 Estos archivos describen:
 
-- Nombres de las fuentes;
-- Rutas de landing;
-- Esquemas por tabla;
-- Type de historización;
-- Propiedades del Delta table;
+- Nombres de las fuentes.
+- Rutas de landing.
+- Esquemas por tabla.
+- Type de historización.
+- Propiedades del Delta table.
 - Validaciones de calidad.
 
 ### 4.5 Transformaciones
@@ -221,7 +221,7 @@ Creamos los catalogos, schemas y volumns, adicionalmente se asignan los permisos
 
 #### engineering_team
 
-Es el equipo técnico que trabaja el pipeline y la capa operacional.
+Es el equipo técnico que trabaja el pipeline y la capa operacional. Deben realizar la ingesta, validación, corrección y mantención de los datos en todas las capas.
 
 Permisos asignados:
 
@@ -230,54 +230,54 @@ Permisos asignados:
 - `USE SCHEMA` + `SELECT` + `MODIFY` sobre `electrocasa.silver`
 - `USE SCHEMA` + `SELECT` + `MODIFY` sobre `electrocasa.gold`
 
-Objetivo: permitir ingesta, validación, corrección y mantención de los datos en todas las capas.
-
 #### analysts_team
 
-Es el perfil de negocio y analítica.
+Es el perfil de negocio y analítica que necesita acceso a KPIs y tablas analíticas maduras, sin acceso a la capa operacional cruda.
 
 Permisos asignados:
 
 - `USE CATALOG` sobre `electrocasa`
 - `USE SCHEMA` + `SELECT` sobre `electrocasa.gold`
-
-Objetivo: permitir acceso a KPIs y tablas analíticas maduras, sin acceso a la capa operacional cruda.
 
 #### audit_team
 
-Es el equipo de auditoría y control.
+Es el equipo de auditoría y control para revisar la estructura y los resultados finales sin necesidad de manipular los datos activos.
 
 Permisos asignados:
 
 - `USE CATALOG` sobre `electrocasa`
 - `USE SCHEMA` + `SELECT` sobre `electrocasa.gold`
-- `BROWSE` sobre el catálogo
+- `BROWSE` sobre el catálogo.
 
-Objetivo: revisar la estructura y los resultados finales sin necesidad de manipular los datos activos.
 
----
+### 5.3 Cargar datos
 
-## 6. Cómo desplegar a otro workspace
+Dentro de volumn Langing se deben crear las siguientes carpetas y carga los datos indicados:
 
-El proyecto está preparado para ser desplegado con Databricks Asset Bundles.
+- /devoluciones
+- /empleados
+- /metadata
+  - /bronze: sources.json
+  - /silver: silver.json
+- /productos
+- /resenas
+- /ventas
 
-### 6.1 Prerrequisitos
+Los datos de tracking serán consumidos desde una base de datos, por lo que se debe configuración la conexión correspondientes dentro del archivo [metadata/sources.json](metadata/sources.json), así como la configuración de los secrets con las siguientes denominaciones:
 
-Antes del despliegue debes tener:
+- scope-secret: electrocasa
+- key user: user_db
+- key password: password_db
 
-- acceso administrativo al workspace destino;
-- acceso de cuenta para crear o validar Unity Catalog objects;
-- Databricks CLI instalado y autenticado;
-- permisos para crear Jobs, Pipelines y Catálogos;
-- los mismos grupos `engineering_team`, `analysts_team` y `audit_team` creados en el tenant/account asociado.
+### 5.4. Deploy
 
-### 6.2 Configuración del host y variables
+#### Configuración del host y variables
 
 El archivo [databricks.yml](databricks.yml) define el host del workspace actual:
 
 ```yaml
 workspace:
-  host: https://dbc-fcc8b0b1-83a7.cloud.databricks.com
+  host: https://adb-7405615539762593.13.azuredatabricks.net/
 ```
 
 Cuando se despliega en otro workspace se debe actualizar este valor y, si es necesario, el catálogo por defecto o los esquemas.
@@ -296,7 +296,7 @@ variables:
     default: gold
 ```
 
-### 6.3 Validación del bundle
+#### Validación del bundle
 
 Desde la raíz del proyecto:
 
@@ -306,7 +306,7 @@ databricks bundle validate
 
 Esto valida sintaxis y configuración del bundle antes de desplegar.
 
-### 6.4 Despliegue
+#### Despliegue
 
 Ejecuta:
 
@@ -316,50 +316,70 @@ databricks bundle deploy --target dev
 
 Esto despliega:
 
-- los recursos definidos en [resources/electrocasa_pipeline.yml](resources/electrocasa_pipeline.yml)
-- el job definido en [resources/electrocasa_job.yml](resources/electrocasa_job.yml)
-- la estructura del proyecto en el workspace destino
+- El lakeflow declarative pipeline en [resources/electrocasa_pipeline.yml](resources/electrocasa_pipeline.yml).
+- El job definido en [resources/electrocasa_job.yml](resources/electrocasa_job.yml).
+- La estructura del proyecto en el workspace destino.
 
-### 6.5 Ajustes necesarios en un nuevo workspace
+![Imagen del despligue de los recursos](/capturas/deploy.png)
 
-En un workspace nuevo, además de cambiar el host, es recomendable:
+#### Ejecución
 
-1. verificar que el usuario actual tenga permisos de gestión del bundle;
-2. confirmar que existe el catálogo `electrocasa` o que el bundle pueda crearlo con la cuenta correcta;
-3. garantizar que los grupos de seguridad ya existan en cuenta;
-4. revisar si la ruta de archivos y volúmenes de landing coincide con el objetivo deseado.
+Ejecuta:
 
-### 6.6 Recomendación de uso
+```bash
+databricks bundle run
+```
 
-El proyecto se asume como un entorno de desarrollo o staging con target `dev`, aunque puede replicarse a `prod` modificando el target y ajustando permisos y variables.
+Selecciona entre ejecutar el Job o el Pipeline desplegado.
+
+![Imagen de los comandos ejecutados](/capturas/comandos.png)
+
+Resultados de la ejecución del Job según la estructura definida:
+
+![Imagen del job ejecutado](/capturas/job_ui.png)
+
+Resultados de la ejecución del Pipeline:
+
+![Imagen del pipeline ejecutado](/capturas/pipeline.png)
+
+Resultados de la ejecución del notebook:
+
+![Imagen del notebook ejecutado](/capturas/notebook.png)
+
+Notificacón configurada:
+
+![Imagen del notebook ejecutado](/capturas/notificacion.png)
+
+Estructura del catalogo creado:
+
+![Imagen del catalogo creado](/capturas/catalogo.png)
+
+
+Adicionalmente, se integro al job el notebook [01_validaciones](/notebooks/01_validaciones.ipynb) que consulta a las tablas creadas por el pipeline, así como, consultas para el monitoreo de la ejecución.
 
 ---
 
-## 7. Pipeline y programación
-
-El pipeline se define en [resources/electrocasa_pipeline.yml](resources/electrocasa_pipeline.yml) y se configura como `serverless: true`.
-
-El job se define en [resources/electrocasa_job.yml](resources/electrocasa_job.yml), con la siguiente lógica:
-
-1. ejecutar notebook `00_setup`
-2. esperar su finalización;
-3. lanzar el pipeline `project_electrocasa_etl`
-
-### 7.1 Programación
+## 7. programación
 
 La programación está configurada en Quartz con:
 
 ```yaml
-quartz_cron_expression: 10 0 22 * * ?
+quartz_cron_expression: 15 59 23 * * ?
 timezone_id: America/Lima
 pause_status: UNPAUSED
 ```
 
-Esto corresponde a una ejecución diaria a las 22:00:10 hora de Lima, es decir, una vez al día.
+Esto corresponde a una ejecución diaria a las 23:59:00 hora de Lima, es decir, una vez al día.
 
-Se estableció una frecuencia diaria porque el caso de uso se comporta como un ETL de carga regular y consolidación reportable, y no requiere ejecución en tiempo real ni continua.
+Se estableció una frecuencia diaria porque el caso de uso se comporta como un ETL de carga regular, considerando que la frecuencia de actualización de las tablas en su mayoria es diaria y de baja frecuencia, y no requiere ejecución en tiempo real ni continua.
 
 ---
+
+## 8. Troubleshooting
+
+Se cuenta con una Event log para monitorear el estado de las ejecuciones del job y pipeline. Algunas consultas de monitoreo se ubican en el archivo [01_validaciones](/notebooks/01_validaciones.ipynb).
+
+![Imagen del montoreo](/capturas/monitoreo.png)
 
 ## 8. Suposiciones de cluster y costos
 
@@ -367,9 +387,9 @@ Se estableció una frecuencia diaria porque el caso de uso se comporta como un E
 
 La solución usa un pipeline `serverless` y un job con queue enabled. Esto implica:
 
-- no requiere crear un clúster permanente para la ejecución del pipeline;
-- se paga por los recursos realmente utilizados en cada ejecución;
-- se reduce la sobrecarga operativa en comparación con un cluster dedicado.
+- No requiere crear un clúster permanente para la ejecución del pipeline.
+- Se paga por los recursos realmente utilizados en cada ejecución.
+- Se reduce la sobrecarga operativa en comparación con un cluster dedicado.
 
 También se usa `performance_target: PERFORMANCE_OPTIMIZED`, que busca equilibrar latencia y rendimiento para las cargas analíticas y tareas de transformación.
 
@@ -377,25 +397,15 @@ También se usa `performance_target: PERFORMANCE_OPTIMIZED`, que busca equilibra
 
 La estrategia de costo asumida es:
 
-- uso serverless para cargas diarias y transformaciones moderadas;
-- ejecución automática una vez al día;
-- no se mantienen clústeres siempre encendidos;
-- arquitectura orientada a volumen de datos medio o pequeño-mediano.
+- Uso serverless para cargas diarias y transformaciones moderadas.
+- Ejecución automática una vez al día con un tiempo aproximando de ejecución de 3 a 4 minutos.
+- No se mantienen clústeres siempre encendidos.
+- Arquitectura orientada a volumen de datos medio o pequeño-mediano.
 
-Bajo esta configuración, el costo esperado es relativamente bajo para un entorno de laboratorio, prueba o negocio con carga moderada. Si el volumen crece o la latencia debe disminuir, se podría pasar a clústeres dedicados o ajustar el pipeline para parallelismo más agresivo.
+Bajo esta configuración, el costo esperado es relativamente bajo para un entorno de prueba con carga moderada. Si el volumen crece o la latencia debe disminuir, se podría pasar a clústeres dedicados o ajustar el pipeline para parallelismo más agresivo.
 
----
-
-## 9. Flujo funcional del proyecto
-
-El flujo actual del repositorio es:
-
-1. Subir archivos al volumen `electrocasa.bronze.landing`.
-2. Ingestar datos desde landing hacia tablas bronze.
-3. Aplicar validaciones y transformaciones en silver.
-4. Realizar historización mediante SCD1/SCD2 según cada tabla.
-5. Generar agregados y KPIs en gold.
-6. Exponer los resultados para analistas y auditoría según permisos.
+- Cluster Serverless 0,550 US$ Por DBU por hora, considerando una hora diara a lo mucho, serian unos 16.5 US$.
+- Costo de la infraestructura total según la sección de facturación de Azure por dia se estima 1.2 US$, por lo que al mes resulta 1.2 x 30 = 36 US$ en total.
 
 ---
 
@@ -403,41 +413,12 @@ El flujo actual del repositorio es:
 
 La solución usa Unity Catalog para garantizar:
 
-- separación de responsabilidades por capa;
-- control de acceso por catálogo, esquema y grupo;
-- trazabilidad sobre los datos de negocio;
-- aislamiento entre los perfiles de ingeniería, analítica y auditoría.
+- Separación de responsabilidades por capa.
+- Control de acceso por catálogo, esquema y grupo.
+- Trazabilidad sobre los datos de negocio.
+- Aislamiento entre los perfiles de ingeniería, analítica y auditoría.
 
 Esto es clave para un entorno de datos empresarial, ya que evita que usuarios no autorizados puedan consultar o alterar datos sensibles o operativos.
 
 ---
 
-## 11. Resumen ejecutable
-
-Para poner en marcha el proyecto en un workspace nuevo:
-
-1. Crear los grupos `engineering_team`, `analysts_team` y `audit_team` en Account Console.
-2. Ejecutar el notebook de setup para crear catalog, schemas y volumen.
-3. Asignar permisos a cada grupo con los SQL de grant mostrados en el notebook.
-4. Configurar el host del workspace en [databricks.yml](databricks.yml).
-5. Validar el bundle:
-
-```bash
-databricks bundle validate
-```
-
-6. Desplegar:
-
-```bash
-databricks bundle deploy --target dev
-```
-
-7. Confirmar que el job se ejecuta diariamente a las 22:00:10 (America/Lima).
-
----
-
-## 12. Conclusión
-
-El proyecto representa una implementación realista de un lakehouse empresarial en Databricks con enfoque en gobernanza, calidad y analítica de negocio. La combinación de bronze, silver y gold, la historización por tipo de entidad y la seguridad basada en grupos de Unity Catalog convierten esta solución en una base sólida para expandir analítica y reporting en Electrocasa.
-
-La decisión de usar tablas Delta, historización SCD1/SCD2 según el caso, y un pipeline serverless con programación diaria responde a un equilibrio entre costo, cumplimiento y simplicidad operativa, manteniendo un diseño escalable para crecimiento futuro.

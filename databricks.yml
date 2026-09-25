@@ -18,9 +18,15 @@ variables:
   schema_gold:
     description: Gold layer schema
     default: gold
-  # root_path:
-  #   description: Root path Pipeline
-    # default: /
+  schema_monitoring:
+    description: Monitoring layer schema
+    default: monitoring
+  table_monitoring:
+    description: Monitoring layer table
+    default: event_log_electrocasa
+  root_path:
+    description: Root path Pipeline
+    default: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
 
 targets:
   dev:
@@ -29,10 +35,38 @@ targets:
     presets:
       source_linked_deployment: false
     workspace:
-      host: https://dbc-fcc8b0b1-83a7.cloud.databricks.com
-      # root_path: ${workspace.file_path}
+      host: https://adb-7405615539762593.13.azuredatabricks.net/
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
     variables:
-      catalog: electrocasa
+      table_monitoring: event_log_electrocasa
+    permissions:
+      - user_name: ${workspace.current_user.userName}
+        level: CAN_MANAGE
+  
+  test:
+    mode: production
+    default: false
+    presets:
+      source_linked_deployment: true
+    workspace:
+      host: https://adb-7405615539762593.13.azuredatabricks.net/
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      table_monitoring: event_log_electrocasa_qa
+    permissions:
+      - user_name: ${workspace.current_user.userName}
+        level: CAN_MANAGE
+
+  prod:
+    mode: production
+    default: false
+    presets:
+      source_linked_deployment: true
+    workspace:
+      host: https://adb-7405615539762593.13.azuredatabricks.net/
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      table_monitoring: event_log_electrocasa_prod
     permissions:
       - user_name: ${workspace.current_user.userName}
         level: CAN_MANAGE
