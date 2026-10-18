@@ -118,11 +118,11 @@ Por esa razón, la metadata de `empleados` define:
 
 ### 3.2 Tipo de tabla
 
-- Vistas materializadas sobre `tracking` y `productos` porque el origen entrega una foto completa de los datos con alteraciones menores y de baja volumetria, siendo que volverla a escribir completa es extremadamente bajo y no toma tiempo.
+- Vistas materializadas sobre `tracking` y `productos` porque el origen entrega una foto completa de los datos con alteraciones menores y de baja volumetria, siendo que volverla a escribir completa es extremadamente bajo y no toma tiempo considerable.
 
 - Tablas Streaming sobre `ventas`, `reseñas`, `devoluciones` y `empleados` para tablas con mayor flujo de información que requiere ser almacenada de forma incremental.
 
-Toda las tablas, excepto `tracking`, son del tipo Managed para que Databricks ejecute de forma autónoma tareas de mantenimiento como OPTIMIZE y VACUUM, además de aplicar optimizaciones en tiempo ejecución. La tabla `tracking` proviene de una fuente externa de datos (base de datos) por lo que será una tabla tipo External
+Toda las tablas son del tipo Managed para que Databricks ejecute de forma autónoma tareas de mantenimiento como OPTIMIZE y VACUUM, además de aplicar optimizaciones en tiempo ejecución.
 
 ---
 

@@ -15,12 +15,20 @@ resources:
         - task_key: electrocasa_pipeline
           pipeline_task:
             pipeline_id: ${resources.pipelines.project_electrocasa_etl.id}
+          max_retries: 1
+          min_retry_interval_millis: 1000
+          retry_on_timeout: true
+          disable_auto_optimization: false
         - task_key: validation_tables
           depends_on:
             - task_key: electrocasa_pipeline
           notebook_task:
             notebook_path: ${workspace.file_path}/notebooks/01_validaciones
             source: WORKSPACE
+          max_retries: 1
+          min_retry_interval_millis: 1000
+          retry_on_timeout: true
+          disable_auto_optimization: false
       queue:
         enabled: true
       performance_target: PERFORMANCE_OPTIMIZED
