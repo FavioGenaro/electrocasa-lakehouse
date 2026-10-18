@@ -24,7 +24,7 @@ target = get_table_path(devoluciones_config, "target")
     name="view_devoluciones",
     comment="Tabla de devoluciones con validaciones aplicadas"
 )
-@dp.expect_all(valid_expects)
+@dp.expect_or_drop(valid_expects)
 def staging_devoluciones():
 
     df = (

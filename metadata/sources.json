@@ -25,8 +25,8 @@
         "venta_id": "string",
         "sucursal_id": "string",
         "producto_id": "string",
-        "cantidad": "integer",
-        "monto_total": "decimal(18,2)",
+        "cantidad": "string",
+        "monto_total": "string",
         "metodo_pago": "string",
         "fecha_venta": "string",
         "canal": "string"
@@ -58,7 +58,7 @@
         "nombre_producto": "string",
         "categoria": "string",
         "marca": "string",
-        "precio_lista": "decimal(18,2)"
+        "precio_lista": "string"
       }
     },
 
@@ -87,7 +87,7 @@
         "nombre": "string",
         "dni": "string",
         "email": "string",
-        "salario": "decimal(18,2)",
+        "salario": "string",
         "sucursal_id": "string",
         "cargo": "string",
         "tipo_evento": "string",
@@ -119,10 +119,10 @@
         "resena_id": "string",
         "producto_id": "string",
         "cliente_id": "string",
-        "calificacion": "integer",
+        "calificacion": "string",
         "comentario": "string",
-        "tags": "array<string>",
-        "respuestas": "array<objectrespuestaresena>",
+        "tags": "string",
+        "respuestas": "string",
         "fecha_resena": "string"
       }
     },
@@ -153,7 +153,7 @@
         "sucursal_id": "string",
         "producto_id": "string",
         "motivo": "string",
-        "monto_reembolso": "decimal(18,2)",
+        "monto_reembolso": "string",
         "fecha_devolucion": "string"
       }
     },

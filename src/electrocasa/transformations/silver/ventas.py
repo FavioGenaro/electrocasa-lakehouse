@@ -24,7 +24,7 @@ target = get_table_path(ventas_config, "target")
     name="view_ventas",
     comment="Tabla de ventas con validaciones aplicadas"
 )
-@dp.expect_all(valid_expects)
+@dp.expect_or_drop(valid_expects)
 def staging_ventas():
 
     df = (

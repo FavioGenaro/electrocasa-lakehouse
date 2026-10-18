@@ -20,7 +20,7 @@ valid_expects = resenas_config.get("expectations", {})
 source = get_table_path(resenas_config, "source")
 target = get_table_path(resenas_config, "target")
 
-@dp.temporary_view(
+@dp.expect_or_drop(
     name="view_resenas",
     comment="Tabla de resenas con validaciones aplicadas"
 )

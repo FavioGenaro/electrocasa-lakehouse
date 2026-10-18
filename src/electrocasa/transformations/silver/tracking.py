@@ -24,7 +24,7 @@ target = get_table_path(tracking_config, "target")
     name="view_tracking",
     comment="Tabla de tracking con validaciones aplicadas"
 )
-@dp.expect_all(valid_expects)
+@dp.expect_or_drop(valid_expects)
 def staging_tracking():
 
     df = (
